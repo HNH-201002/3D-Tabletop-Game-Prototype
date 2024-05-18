@@ -13,10 +13,11 @@ public class PathFinder : MonoBehaviour
     public int totalNumberOfPoints = 50;
     public int numberOfBonusPoints = 5;
     public int numberOfFailPoints = 5;
-    public float maxSampleDistance = 1.0f; // Khoảng cách tối đa để sample vị trí trên NavMesh
+    public float maxSampleDistance = 1.0f;
 
     private List<Vector3> sampledPoints = new List<Vector3>();
     private HashSet<Vector3> occupiedPositions = new HashSet<Vector3>();
+    public List<SpawnedPoint> spawnedPoints = new List<SpawnedPoint>();
 
     private void Start()
     {
@@ -108,29 +109,55 @@ public class PathFinder : MonoBehaviour
         availablePositions.RemoveAt(0); // Remove start point
         availablePositions.RemoveAt(availablePositions.Count - 1); // Remove end point
 
-        SpawnSpecialPoints(bonusPointPrefab, availablePositions, ref bonusPointsSpawned, numberOfBonusPoints);
-        SpawnSpecialPoints(failPointPrefab, availablePositions, ref failPointsSpawned, numberOfFailPoints);
-
-        foreach (Vector3 position in points)
+        // Create a list to store the indices of the bonus and fail points
+        List<int> specialPointIndices = new List<int>();
+        for (int i = 0; i < numberOfBonusPoints; i++)
         {
-            if (!occupiedPositions.Contains(position))
-            {
-                Instantiate(pointPrefab, position, Quaternion.identity);
-                occupiedPositions.Add(position);
-            }
+            specialPointIndices.Add(Random.Range(0, availablePositions.Count));
         }
-    }
-
-    void SpawnSpecialPoints(GameObject specialPrefab, List<Vector3> availablePositions, ref int pointsSpawned, int numberOfPoints)
-    {
-        while (pointsSpawned < numberOfPoints && availablePositions.Count > 0)
+        for (int i = 0; i < numberOfFailPoints; i++)
         {
-            int randomIndex = Random.Range(0, availablePositions.Count);
-            Vector3 randomPosition = availablePositions[randomIndex];
-            Instantiate(specialPrefab, randomPosition, Quaternion.identity);
-            occupiedPositions.Add(randomPosition);
-            availablePositions.RemoveAt(randomIndex);
-            pointsSpawned++;
+            specialPointIndices.Add(Random.Range(0, availablePositions.Count));
+        }
+        specialPointIndices.Sort();
+
+        // Iterate through the sampled points and instantiate the appropriate prefabs
+        for (int i = 0; i < points.Count; i++)
+        {
+            if (occupiedPositions.Contains(points[i]))
+            {
+                continue;
+            }
+
+            GameObject pointGO = null;
+            SpawnedPoint spawnedPointGO = null;
+
+            if (specialPointIndices.Contains(i))
+            {
+                // Spawn bonus or fail points
+                if (bonusPointsSpawned < numberOfBonusPoints)
+                {
+                    pointGO = Instantiate(bonusPointPrefab, points[i], Quaternion.identity);
+                    bonusPointsSpawned++;
+                }
+                else if (failPointsSpawned < numberOfFailPoints)
+                {
+                    pointGO = Instantiate(failPointPrefab, points[i], Quaternion.identity);
+                    failPointsSpawned++;
+                }
+            }
+            else
+            {
+                // Spawn normal points
+                pointGO = Instantiate(pointPrefab, points[i], Quaternion.identity);
+            }
+
+            if (pointGO != null)
+            {
+                spawnedPointGO = pointGO.GetComponent<SpawnedPoint>();
+                spawnedPoints.Add(spawnedPointGO);
+                occupiedPositions.Add(points[i]);
+            }
         }
     }
 }

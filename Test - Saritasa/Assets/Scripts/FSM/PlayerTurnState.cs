@@ -11,11 +11,11 @@ public class PlayerTurnState : GameState
 
     public override void UpdateState(GameManager gameManager)
     {
-        // Update logic for player turn if necessary
+        
     }
 
     public override void ExitState(GameManager gameManager)
     {
-        // Cleanup if necessary
+        
     }
 }

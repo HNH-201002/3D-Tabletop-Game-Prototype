@@ -1,35 +1,108 @@
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private DiceRoll diceRoll;
+    private int diceResult;
+    public List<SpawnedPoint> spawnedPoints { private get; set; }
+
+    private int currentPointIndex = -1;
+    [SerializeField] private Animator ani;
+    private void Start()
+    {
+        diceRoll = FindObjectOfType<DiceRoll>();
+    }
+
     public void StartTurn()
     {
-        Debug.Log("Player " + gameObject.name + " turn started.");
-        // Trigger dice roll
+        StartCoroutine(WaitForPlayerInput());
+    }
+
+    private IEnumerator WaitForPlayerInput()
+    {
+
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
         StartCoroutine(RollDiceAndMove());
     }
 
     private IEnumerator RollDiceAndMove()
     {
-        // Simulate dice roll
-        int diceResult = RollDice();
-        Debug.Log("Rolled a " + diceResult);
+        if (diceRoll == null)
+        {
+            yield break;
+        }
+        yield return StartCoroutine(diceRoll.Roll(OnDiceResult));
+    }
 
-        // Move character based on dice result
+    private void OnDiceResult(int result)
+    {
+        diceResult = result;
+        Debug.Log("Rolled a " + diceResult);
+        StartCoroutine(MovePlayer());
+    }
+
+    private IEnumerator MovePlayer()
+    {
         for (int i = 0; i < diceResult; i++)
         {
-            // Move one step
-            transform.position += Vector3.forward; // Example movement
+            currentPointIndex++;
+            if (currentPointIndex >= spawnedPoints.Count)
+            {
+                currentPointIndex = 0; 
+            }
+
+            Vector3 targetPosition = spawnedPoints[currentPointIndex].transform.position;
+            while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+            {
+                Vector3 direction = (targetPosition - transform.position).normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 0.7f);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 0.7f); // Speed can be adjusted
+                ani.SetBool("Move", true);
+                yield return null;
+            }
+            ani.SetBool("Move", false);
             yield return new WaitForSeconds(0.5f);
         }
 
-        // End turn after movement
+
+        if (spawnedPoints[currentPointIndex].Type == PointType.Bonus)
+        {
+            StartCoroutine(WaitForPlayerInput());
+        }
+        else if (spawnedPoints[currentPointIndex].Type == PointType.Fail)
+        {
+            currentPointIndex -= 3; 
+            if (currentPointIndex < 0)
+            {
+                currentPointIndex = 0; 
+            }
+            StartCoroutine(MovePlayerToCurrentIndex());
+        }
+        else
+        {
+            GameManager.Instance.EndTurn();
+        }
+    }
+
+    private IEnumerator MovePlayerToCurrentIndex()
+    {
+        Vector3 targetPosition = spawnedPoints[currentPointIndex].transform.position;
+
+        while (Vector3.Distance(transform.position, targetPosition) > 0.001f)
+        {
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 0.7f);
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 0.7f);
+            ani.SetBool("Move", true);
+            yield return null;
+        }
+        ani.SetBool("Move", false);
+        yield return new WaitForSeconds(0.5f);
         GameManager.Instance.EndTurn();
     }
 
-    private int RollDice()
-    {
-        return Random.Range(1, 7);
-    }
 }
