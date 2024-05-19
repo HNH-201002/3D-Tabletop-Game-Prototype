@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 1204387396410604166}
   - component: {fileID: 2408523413912773363}
   - component: {fileID: 923082934457789541}
+  - component: {fileID: 9093171727958237719}
   m_Layer: 6
   m_Name: Sparrow
   m_TagString: Untagged
@@ -211,6 +212,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ani: {fileID: 5990476551020811407}
+--- !u!114 &9093171727958237719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4699820037995687581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb72a423ee0ffc14dbbeb3e0e1a3d6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5113505144213996095
 GameObject:
   m_ObjectHideFlags: 0

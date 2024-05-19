@@ -35,6 +35,7 @@ public class SpawnPlayerManager : MonoBehaviour
             int prefabIndex = GetUniquePrefabIndex(usedPrefabs);
 
             GameObject playerObj = Instantiate(playerPrefabs[prefabIndex], GetSpawnPoint(i), Quaternion.Euler(0, 90, 0));
+            playerObj.name = inputName;
             Player player = playerObj.GetComponent<Player>();
 
             Color randomColor = Random.ColorHSV();

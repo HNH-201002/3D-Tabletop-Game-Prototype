@@ -1097,6 +1097,7 @@ GameObject:
   - component: {fileID: 2562686252690266555}
   - component: {fileID: 1317972689848680910}
   - component: {fileID: 1641617094886451264}
+  - component: {fileID: 4807606608377357506}
   m_Layer: 6
   m_Name: Squid
   m_TagString: Untagged
@@ -1175,6 +1176,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ani: {fileID: 8679123106004378070}
+--- !u!114 &4807606608377357506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8223492696126082464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb72a423ee0ffc14dbbeb3e0e1a3d6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8809716288485812055
 GameObject:
   m_ObjectHideFlags: 0

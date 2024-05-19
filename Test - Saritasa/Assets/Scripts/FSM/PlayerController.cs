@@ -7,9 +7,14 @@ public class PlayerController : MonoBehaviour
     private DiceRoll diceRoll;
     private int diceResult;
     public List<SpawnedPoint> spawnedPoints { private get; set; }
+    public PlayerStatistics Statistics { get; private set; }
 
     private int currentPointIndex = -1;
     [SerializeField] private Animator ani;
+    private void Awake()
+    {
+        Statistics = gameObject.GetComponent<PlayerStatistics>();
+    }
     private void Start()
     {
         diceRoll = FindObjectOfType<DiceRoll>();
@@ -22,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator WaitForPlayerInput()
     {
-
+        Statistics.IncrementTurnsTaken();   
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
         StartCoroutine(RollDiceAndMove());
     }
@@ -50,9 +55,12 @@ public class PlayerController : MonoBehaviour
             currentPointIndex++;
             if (currentPointIndex >= spawnedPoints.Count)
             {
-                currentPointIndex = 0; 
+                EventManager.PlayerEndTurn(GameManager.Instance.GetCurrentPlayerIndex(), this);
+                GameManager.Instance.EndTurn();
+                yield return new WaitForEndOfFrame(); 
+                gameObject.SetActive(false);
+                yield break;
             }
-
             Vector3 targetPosition = spawnedPoints[currentPointIndex].transform.position;
             while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
             {
@@ -67,17 +75,18 @@ public class PlayerController : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-
         if (spawnedPoints[currentPointIndex].Type == PointType.Bonus)
         {
+            Statistics.IncrementBonusPoints();
             StartCoroutine(WaitForPlayerInput());
         }
         else if (spawnedPoints[currentPointIndex].Type == PointType.Fail)
         {
-            currentPointIndex -= 3; 
+            Statistics.IncrementFailPoints();
+            currentPointIndex -= 3;
             if (currentPointIndex < 0)
             {
-                currentPointIndex = 0; 
+                currentPointIndex = 0;
             }
             StartCoroutine(MovePlayerToCurrentIndex());
         }
@@ -104,5 +113,4 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         GameManager.Instance.EndTurn();
     }
-
 }

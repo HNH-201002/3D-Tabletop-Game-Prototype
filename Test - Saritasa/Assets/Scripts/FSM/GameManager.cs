@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public List<GameObject> players;
     [HideInInspector]
-    private int numberOfPlayers;
+    public int numberOfPlayers { get; private set; }
     private int currentPlayerIndex = 0;
     private GameState currentState;
     private bool playersSpawned = false;
@@ -43,7 +43,14 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
+ 
         currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+
+        while (!players[currentPlayerIndex].activeSelf)
+        {
+            currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
+        }
+
         SetState(new PlayerTurnState());
     }
 
@@ -64,6 +71,11 @@ public class GameManager : MonoBehaviour
         players[playerIndex].GetComponent<PlayerController>().StartTurn();
     }
 
+    private void HandlePlayersSpawned(List<GameObject> players)
+    {
+        this.players = players;
+        playersSpawned = true;
+    }
     private void OnEnable()
     {
         EventManager.OnPlayersSpawned += HandlePlayersSpawned;
@@ -74,9 +86,4 @@ public class GameManager : MonoBehaviour
         EventManager.OnPlayersSpawned -= HandlePlayersSpawned;
     }
 
-    private void HandlePlayersSpawned(List<GameObject> players)
-    {
-        this.players = players;
-        playersSpawned = true;
-    }
 }

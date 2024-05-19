@@ -441,6 +441,7 @@ GameObject:
   - component: {fileID: 1764259057227517306}
   - component: {fileID: 2999948206579012879}
   - component: {fileID: 2504051625959128971}
+  - component: {fileID: 2901253836837577277}
   m_Layer: 6
   m_Name: Pudu
   m_TagString: Untagged
@@ -519,6 +520,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ani: {fileID: 2912912957614682045}
+--- !u!114 &2901253836837577277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5328922587008588129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb72a423ee0ffc14dbbeb3e0e1a3d6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5618908891133398948
 GameObject:
   m_ObjectHideFlags: 0

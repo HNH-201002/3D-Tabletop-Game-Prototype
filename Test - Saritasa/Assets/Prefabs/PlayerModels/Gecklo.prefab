@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5922382417465803456}
   - component: {fileID: 7199738281513720501}
   - component: {fileID: 4356219750425908688}
+  - component: {fileID: 6472016087867416343}
   m_Layer: 6
   m_Name: Gecklo
   m_TagString: Untagged
@@ -91,6 +92,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ani: {fileID: 3875830729775775445}
+--- !u!114 &6472016087867416343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270020221873264347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb72a423ee0ffc14dbbeb3e0e1a3d6bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1001681021198776453
 GameObject:
   m_ObjectHideFlags: 0
