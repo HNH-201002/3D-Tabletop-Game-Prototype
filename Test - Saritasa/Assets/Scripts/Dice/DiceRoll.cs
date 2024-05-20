@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 
 public class DiceRoll : MonoBehaviour
 {
@@ -8,10 +10,12 @@ public class DiceRoll : MonoBehaviour
     private int result = 0;
 
     public float rollForce = 10f;
-    public float rollTorque = 10f;
+    public float rollTorque = 14f;
+    private float valueBarForce = 1f;
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
+    private Vector3 initialScale;
 
     private void Start()
     {
@@ -19,25 +23,40 @@ public class DiceRoll : MonoBehaviour
         rb.useGravity = false;
         initialPosition = transform.position;
         initialRotation = transform.rotation;
+        initialScale = transform.localScale;
+
+        UIBarController.OnValueBarChanged += HandleValueBarChanged;
     }
 
-    public IEnumerator Roll(System.Action<int> callback)
+    private void OnDestroy()
+    {
+        UIBarController.OnValueBarChanged -= HandleValueBarChanged;
+    }
+
+    private void HandleValueBarChanged(float value)
+    {
+        valueBarForce = value;
+    }
+
+    public IEnumerator Roll(Action<int> callback)
     {
         if (!isRolling)
         {
-            isRolling = true; // Đặt cờ isRolling ngay khi bắt đầu lăn
+            isRolling = true;
             gameObject.SetActive(true);
+            transform.localScale = Vector3.zero; 
+            transform.DOScale(initialScale, 0.5f).SetEase(Ease.OutBounce); 
+            yield return new WaitForSeconds(0.5f);
             rb.useGravity = true;
-            Debug.Log("is rolling");
             HandleRoll();
             yield return StartCoroutine(WaitForRoll(callback));
         }
     }
 
-    private IEnumerator WaitForRoll(System.Action<int> callback)
+    private IEnumerator WaitForRoll(Action<int> callback)
     {
         float elapsedTime = 0f;
-        const float timeout = 2f;
+        const float timeout = 3;
 
         while (!rb.IsSleeping() && elapsedTime < timeout)
         {
@@ -47,16 +66,15 @@ public class DiceRoll : MonoBehaviour
 
         if (rb.IsSleeping())
         {
-            Debug.Log("Dice Result: " + result);
             callback(result);
         }
         else
         {
-            result = Random.Range(1, 7);
+            result = UnityEngine.Random.Range(1, 7);
             callback(result);
         }
 
-        isRolling = false; 
+        isRolling = false;
         ResetDice();
     }
 
@@ -65,17 +83,19 @@ public class DiceRoll : MonoBehaviour
         rb.useGravity = true;
         rb.isKinematic = false;
 
+        float adjustedValueBarForce = Mathf.Max(valueBarForce / 100, 0.1f); 
+
         Vector3 randomForce = new Vector3(
-            Random.Range(-1f, 1f),
+            UnityEngine.Random.Range(-1f, 1f),
             1f,
-            Random.Range(-1f, 1f)
-        ) * rollForce;
+            UnityEngine.Random.Range(-1f, 1f)
+        ) * rollForce * adjustedValueBarForce;
 
         Vector3 randomTorque = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f)
-        ) * rollTorque;
+            UnityEngine.Random.Range(-1f, 1f),
+            UnityEngine.Random.Range(-1f, 1f),
+            UnityEngine.Random.Range(-1f, 1f)
+        ) * rollTorque * adjustedValueBarForce;
 
         rb.AddForce(randomForce, ForceMode.Impulse);
         rb.AddTorque(randomTorque, ForceMode.Impulse);
@@ -87,9 +107,13 @@ public class DiceRoll : MonoBehaviour
         rb.isKinematic = true;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        transform.position = initialPosition;
-        transform.rotation = initialRotation;
-        gameObject.SetActive(false);
+        transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBounce).OnComplete(() =>
+        {
+            transform.position = initialPosition;
+            transform.rotation = initialRotation;
+            transform.localScale = initialScale; 
+            gameObject.SetActive(false);
+        });
     }
 
     private void SetDiceResult(int rolledResult)

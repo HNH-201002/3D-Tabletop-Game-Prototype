@@ -25,7 +25,6 @@ public class PathFinder : MonoBehaviour
         {
             SamplePathPoints(navMeshPath);
             SpawnPoints(pointPrefab, bonusPointPrefab, failPointPrefab, sampledPoints, numberOfBonusPoints, numberOfFailPoints);
-            Debug.Log("Path sampling complete.");
         }
         else
         {

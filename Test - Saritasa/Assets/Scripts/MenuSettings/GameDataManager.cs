@@ -25,6 +25,7 @@ public class GameDataManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -32,9 +33,50 @@ public class GameDataManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
     private void Start()
     {
-        startGame.onClick.AddListener(StartGame);
+        AssignReferences();
+    }
+
+    private void AssignReferences()
+    {
+        UIReferences uiReferences = FindObjectOfType<UIReferences>();
+        if (uiReferences != null)
+        {
+            startGame = uiReferences.StartGameButton;
+            errorInform = uiReferences.ErrorInformText;
+
+            if (startGame != null)
+            {
+                startGame.onClick.AddListener(StartGame);
+            }
+            else
+            {
+                Debug.LogError("StartGame button reference is missing.");
+            }
+
+            if (errorInform == null)
+            {
+                Debug.LogError("ErrorInform text reference is missing.");
+            }
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        AssignReferences();
     }
 
     private void StartGame()

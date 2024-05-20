@@ -5,7 +5,6 @@ public class PlayerTurnState : GameState
     public override void EnterState(GameManager gameManager)
     {
         int currentPlayerIndex = gameManager.GetCurrentPlayerIndex();
-        Debug.Log("Player " + (currentPlayerIndex + 1) + "'s turn.");
         gameManager.StartTurn(currentPlayerIndex);
     }
 

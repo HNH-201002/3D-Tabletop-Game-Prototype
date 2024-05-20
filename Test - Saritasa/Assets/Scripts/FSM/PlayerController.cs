@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -11,24 +12,44 @@ public class PlayerController : MonoBehaviour
 
     private int currentPointIndex = -1;
     [SerializeField] private Animator ani;
+    private bool valueBarChanged = false;
+    private NavMeshAgent navMeshAgent;
+
     private void Awake()
     {
         Statistics = gameObject.GetComponent<PlayerStatistics>();
+        diceRoll = FindObjectOfType<DiceRoll>();
+        UIBarController.OnValueBarChanged += HandleValueBarChanged;
+        navMeshAgent = GetComponent<NavMeshAgent>();
     }
+
     private void Start()
     {
-        diceRoll = FindObjectOfType<DiceRoll>();
+        diceRoll.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        UIBarController.OnValueBarChanged -= HandleValueBarChanged;
+    }
+
+    private void HandleValueBarChanged(float value)
+    {
+        valueBarChanged = true;
     }
 
     public void StartTurn()
     {
+        UIManager.Instance.SetTurnText(gameObject.name);
+        UIManager.Instance.TurnOnHoldUi();
         StartCoroutine(WaitForPlayerInput());
     }
 
     private IEnumerator WaitForPlayerInput()
     {
-        Statistics.IncrementTurnsTaken();   
-        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+        Statistics.IncrementTurnsTaken();
+        valueBarChanged = false;
+        yield return new WaitUntil(() => valueBarChanged);
         StartCoroutine(RollDiceAndMove());
     }
 
@@ -44,7 +65,7 @@ public class PlayerController : MonoBehaviour
     private void OnDiceResult(int result)
     {
         diceResult = result;
-        Debug.Log("Rolled a " + diceResult);
+        UIManager.Instance.SetDiceResultText(result.ToString());
         StartCoroutine(MovePlayer());
     }
 
@@ -53,32 +74,35 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < diceResult; i++)
         {
             currentPointIndex++;
-            if (currentPointIndex >= spawnedPoints.Count)
-            {
-                EventManager.PlayerEndTurn(GameManager.Instance.GetCurrentPlayerIndex(), this);
-                GameManager.Instance.EndTurn();
-                yield return new WaitForEndOfFrame(); 
-                gameObject.SetActive(false);
-                yield break;
-            }
+
             Vector3 targetPosition = spawnedPoints[currentPointIndex].transform.position;
-            while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+
+            yield return StartCoroutine(RotateTowards(targetPosition));
+
+            navMeshAgent.SetDestination(targetPosition);
+
+            while (navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
             {
-                Vector3 direction = (targetPosition - transform.position).normalized;
-                Quaternion lookRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 0.7f);
-                transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 0.7f); // Speed can be adjusted
                 ani.SetBool("Move", true);
                 yield return null;
             }
             ani.SetBool("Move", false);
             yield return new WaitForSeconds(0.5f);
+
+            if (currentPointIndex >= spawnedPoints.Count - 1)
+            {
+                EventManager.PlayerEndTurn(GameManager.Instance.GetCurrentPlayerIndex(), this);
+                GameManager.Instance.EndTurn();
+                yield return new WaitForEndOfFrame();
+                gameObject.SetActive(false);
+                yield break;
+            }
         }
 
         if (spawnedPoints[currentPointIndex].Type == PointType.Bonus)
         {
             Statistics.IncrementBonusPoints();
-            StartCoroutine(WaitForPlayerInput());
+            StartTurn();
         }
         else if (spawnedPoints[currentPointIndex].Type == PointType.Fail)
         {
@@ -100,17 +124,35 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 targetPosition = spawnedPoints[currentPointIndex].transform.position;
 
-        while (Vector3.Distance(transform.position, targetPosition) > 0.001f)
+        yield return StartCoroutine(RotateTowards(targetPosition));
+
+        navMeshAgent.SetDestination(targetPosition);
+
+        while (navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
         {
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 0.7f);
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.deltaTime * 0.7f);
             ani.SetBool("Move", true);
             yield return null;
         }
         ani.SetBool("Move", false);
         yield return new WaitForSeconds(0.5f);
         GameManager.Instance.EndTurn();
+    }
+
+    private IEnumerator RotateTowards(Vector3 targetPosition)
+    {
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+
+        float elapsedTime = 0f;
+        float duration = 0.5f;
+
+        while (elapsedTime < duration)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, (elapsedTime / duration));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.rotation = lookRotation;
     }
 }

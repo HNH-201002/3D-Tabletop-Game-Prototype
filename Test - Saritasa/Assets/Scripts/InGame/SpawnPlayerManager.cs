@@ -40,7 +40,7 @@ public class SpawnPlayerManager : MonoBehaviour
 
             Color randomColor = Random.ColorHSV();
             player.SetPlayerName(inputName, randomColor);
-
+            player.name = inputName;
             players.Add(playerObj);
 
             playerObj.GetComponent<PlayerController>().spawnedPoints = pathFinder.spawnedPoints;
@@ -72,7 +72,7 @@ public class SpawnPlayerManager : MonoBehaviour
         {
             return spawnPointParent.GetChild(index).position;
         }
-        return Vector3.zero;
+        return spawnPointParent.GetChild(0).position;
     }
     public List<GameObject> GetPlayers()
     {
