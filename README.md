@@ -2,6 +2,11 @@
 
 This repository contains the source code and project files for a digital roll-and-move tabletop game prototype developed as a test task for the Unity Intern position at **Saritasa Vietnam**. The game is designed to be engaging and interactive for kids, featuring a simple yet fun gameplay mechanism.
 
+## Links
+
+- **Game:** [Play the game](https://smackthat.itch.io/tabletop)
+- **YouTube Demo:** [Watch the demo](https://www.youtube.com/watch?v=ViZ5Eqgmijw)
+
 ## Game Overview
 
 **Game Type:** Digital roll-and-move tabletop game.  
