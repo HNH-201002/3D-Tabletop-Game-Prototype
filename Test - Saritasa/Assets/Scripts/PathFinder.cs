@@ -10,14 +10,52 @@ public class PathFinder : MonoBehaviour
     public GameObject pointPrefab;
     public GameObject bonusPointPrefab;
     public GameObject failPointPrefab;
-    public int totalNumberOfPoints = 50;
-    public int numberOfBonusPoints = 5;
-    public int numberOfFailPoints = 5;
+    private int totalNumberOfPoints = 50;
+    private int numberOfBonusPoints = 5;
+    private int numberOfFailPoints = 5;
     public float maxSampleDistance = 1.0f;
 
     private List<Vector3> sampledPoints = new List<Vector3>();
     private HashSet<Vector3> occupiedPositions = new HashSet<Vector3>();
     public List<SpawnedPoint> spawnedPoints = new List<SpawnedPoint>();
+    private void Awake()
+    {
+        totalNumberOfPoints = GameDataManager.Instance.mapSettings[0];
+        numberOfBonusPoints = GameDataManager.Instance.mapSettings[1];
+        numberOfFailPoints = GameDataManager.Instance.mapSettings[2];
+
+        if (totalNumberOfPoints < 2)
+        {
+            totalNumberOfPoints = 10;
+        }
+
+        int maxAllowedSpecialPoints = totalNumberOfPoints - 2;
+
+        if (numberOfBonusPoints + numberOfFailPoints > maxAllowedSpecialPoints)
+        {
+            int excessPoints = (numberOfBonusPoints + numberOfFailPoints) - maxAllowedSpecialPoints;
+            if (numberOfBonusPoints >= numberOfFailPoints)
+            {
+                numberOfBonusPoints -= excessPoints;
+            }
+            else
+            {
+                numberOfFailPoints -= excessPoints;
+            }
+
+            if (numberOfBonusPoints < 0)
+            {
+                numberOfFailPoints += numberOfBonusPoints;
+                numberOfBonusPoints = 0;
+            }
+
+            if (numberOfFailPoints < 0)
+            {
+                numberOfBonusPoints += numberOfFailPoints;
+                numberOfFailPoints = 0;
+            }
+        }
+    }
 
     private void Start()
     {
@@ -105,22 +143,26 @@ public class PathFinder : MonoBehaviour
         int failPointsSpawned = 0;
 
         List<Vector3> availablePositions = new List<Vector3>(points);
-        availablePositions.RemoveAt(0); // Remove start point
-        availablePositions.RemoveAt(availablePositions.Count - 1); // Remove end point
+        availablePositions.RemoveAt(0);
+        availablePositions.RemoveAt(availablePositions.Count - 1);
 
-        // Create a list to store the indices of the bonus and fail points
-        List<int> specialPointIndices = new List<int>();
-        for (int i = 0; i < numberOfBonusPoints; i++)
+        HashSet<int> bonusPointIndices = new HashSet<int>();
+        while (bonusPointIndices.Count < numberOfBonusPoints)
         {
-            specialPointIndices.Add(Random.Range(0, availablePositions.Count));
+            bonusPointIndices.Add(Random.Range(0, availablePositions.Count));
         }
-        for (int i = 0; i < numberOfFailPoints; i++)
-        {
-            specialPointIndices.Add(Random.Range(0, availablePositions.Count));
-        }
-        specialPointIndices.Sort();
 
-        // Iterate through the sampled points and instantiate the appropriate prefabs
+        HashSet<int> failPointIndices = new HashSet<int>();
+        while (failPointIndices.Count < numberOfFailPoints)
+        {
+            int index = Random.Range(0, availablePositions.Count);
+            if (!bonusPointIndices.Contains(index))
+            {
+                failPointIndices.Add(index);
+            }
+        }
+
+        int currentIndex = 0;
         for (int i = 0; i < points.Count; i++)
         {
             if (occupiedPositions.Contains(points[i]))
@@ -131,23 +173,22 @@ public class PathFinder : MonoBehaviour
             GameObject pointGO = null;
             SpawnedPoint spawnedPointGO = null;
 
-            if (specialPointIndices.Contains(i))
+            if (i == 0 || i == points.Count - 1)
             {
-                // Spawn bonus or fail points
-                if (bonusPointsSpawned < numberOfBonusPoints)
-                {
-                    pointGO = Instantiate(bonusPointPrefab, points[i], Quaternion.identity);
-                    bonusPointsSpawned++;
-                }
-                else if (failPointsSpawned < numberOfFailPoints)
-                {
-                    pointGO = Instantiate(failPointPrefab, points[i], Quaternion.identity);
-                    failPointsSpawned++;
-                }
+                pointGO = Instantiate(pointPrefab, points[i], Quaternion.identity);
+            }
+            else if (bonusPointIndices.Contains(currentIndex))
+            {
+                pointGO = Instantiate(bonusPointPrefab, points[i], Quaternion.identity);
+                bonusPointsSpawned++;
+            }
+            else if (failPointIndices.Contains(currentIndex))
+            {
+                pointGO = Instantiate(failPointPrefab, points[i], Quaternion.identity);
+                failPointsSpawned++;
             }
             else
             {
-                // Spawn normal points
                 pointGO = Instantiate(pointPrefab, points[i], Quaternion.identity);
             }
 
@@ -157,6 +198,11 @@ public class PathFinder : MonoBehaviour
                 spawnedPoints.Add(spawnedPointGO);
                 occupiedPositions.Add(points[i]);
             }
+
+            currentIndex++;
         }
     }
+
+
+
 }

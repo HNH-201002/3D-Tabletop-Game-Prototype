@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Linq;
+using DG.Tweening; 
 
 public class GameDataManager : MonoBehaviour
 {
@@ -57,6 +58,7 @@ public class GameDataManager : MonoBehaviour
             if (startGame != null)
             {
                 startGame.onClick.AddListener(StartGame);
+                AnimateStartGameButton();  
             }
             else
             {
@@ -131,5 +133,12 @@ public class GameDataManager : MonoBehaviour
     public void ClearPlayerProfiles()
     {
         PlayerProfiles.Clear();
+    }
+
+    private void AnimateStartGameButton()
+    {
+        startGame.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.8f)
+            .SetLoops(-1, LoopType.Yoyo)
+            .SetEase(Ease.InOutQuad);
     }
 }

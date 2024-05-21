@@ -2,6 +2,8 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,6 +18,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text diceResultText;
     [SerializeField] private GameObject holdUi;
 
+    [SerializeField] private Button pauseButton;
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private Button renewButton;
+    [SerializeField] private Button turnOffPausePanel;
+    [SerializeField] private FreeFlyCamera freeFlyCamera;
+    private const string renewSceneName = "MainMenu";
+    bool toggle = false;
     private void Awake()
     {
         if (_instance == null)
@@ -30,8 +39,41 @@ public class UIManager : MonoBehaviour
         turnText.text = "";
         diceResultText.text = "";
         holdUi.SetActive(false);
-    }
+        pausePanel.SetActive(false);
 
+        pauseButton.onClick.AddListener(TogglePausePanel);
+        renewButton.onClick.AddListener(RenewButtonEvent);
+        turnOffPausePanel.onClick.AddListener(TogglePausePanel);
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            toggle = !toggle;
+            freeFlyCamera.GetComponent<FreeFlyCamera>().enabled = toggle;
+            Cursor.lockState = toggle ? CursorLockMode.Locked : CursorLockMode.None;
+            Time.timeScale = toggle ? 1.0f : 0.0f;
+        }
+    }
+    private void TogglePausePanel()
+    {
+        pausePanel.SetActive(!pausePanel.activeInHierarchy);
+        if (pausePanel.activeInHierarchy)
+        {
+            freeFlyCamera.GetComponent<FreeFlyCamera>().enabled = !pausePanel.activeInHierarchy;
+            Time.timeScale = 0;
+        }
+        else
+        {
+            freeFlyCamera.GetComponent<FreeFlyCamera>().enabled = !pausePanel.activeInHierarchy;
+            Time.timeScale = 1;
+        }
+    }
+    private void RenewButtonEvent()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene(renewSceneName);
+    }
     public void SetTurnText(string content)
     {
         turnText.text = $"{content}'s turn";

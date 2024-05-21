@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2978799241275661504}
   - component: {fileID: 1058949996417689610}
   - component: {fileID: 3918614657774423944}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bonus Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6465046391499897290}
   - component: {fileID: 9105295730105732352}
   - component: {fileID: 1054175236101765428}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Fail Rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
