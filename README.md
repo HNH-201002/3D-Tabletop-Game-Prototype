@@ -13,7 +13,7 @@ This repository contains the source code and project files for a digital roll-an
 - **AWSD:** Move Camera
 - **Mouse:** Rotate Camera
 - **Space:** Roll the dice
-- 
+  
 ## Game Overview
 
 **Game Type:** Digital roll-and-move tabletop game.  
