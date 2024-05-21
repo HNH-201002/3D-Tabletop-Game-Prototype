@@ -9,8 +9,8 @@ public class DiceRoll : MonoBehaviour
     private bool isRolling = false;
     private int result = 0;
 
-    public float rollForce = 10f;
-    public float rollTorque = 14f;
+    [SerializeField] private float rollForce = 2;
+    [SerializeField] private float rollTorque = 2;
     private float valueBarForce = 1f;
 
     private Vector3 initialPosition;
