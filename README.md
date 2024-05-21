@@ -6,7 +6,14 @@ This repository contains the source code and project files for a digital roll-an
 
 - **Game:** [Play the game](https://smackthat.itch.io/tabletop)
 - **YouTube Demo:** [Watch the demo](https://www.youtube.com/watch?v=ViZ5Eqgmijw)
+- 
+### Controls
 
+- **R:** Reset Camera
+- **AWSD:** Move Camera
+- **Mouse:** Rotate Camera
+- **Space:** Roll the dice
+- 
 ## Game Overview
 
 **Game Type:** Digital roll-and-move tabletop game.  
